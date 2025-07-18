@@ -1,32 +1,18 @@
-package com.player.api;
+package com.player.api.dto;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "players")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Player {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class PlayerResponse {
     private Long id;
-    
-    @Column(nullable = false)
     private String firstName;
-    
-    @Column(nullable = false)
     private String lastName;
-    
-    @Column
     private String position;
-    
-    @Column
     private String team;
 } 

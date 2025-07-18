@@ -1,6 +1,11 @@
 package com.player.api;
 
+import com.player.api.dto.CreatePlayerRequest;
+import com.player.api.dto.PatchPlayerRequest;
+import com.player.api.dto.PlayerResponse;
+import com.player.api.dto.UpdatePlayerRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,39 +19,41 @@ public class PlayerController {
     private PlayerService playerService;
     
     @GetMapping
-    public List<Player> getAllPlayers() {
-        return playerService.getAllPlayers();
+    public ResponseEntity<List<PlayerResponse>> getAllPlayers() {
+        List<PlayerResponse> players = playerService.getAllPlayers();
+        return ResponseEntity.ok(players);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Player> getPlayerById(@PathVariable Long id) {
+    public ResponseEntity<PlayerResponse> getPlayerById(@PathVariable Long id) {
         return playerService.getPlayerById(id)
-                .map(player -> ResponseEntity.ok().body(player))
-                .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new PlayerNotFoundException(id));
     }
     
     @PostMapping
-    public Player createPlayer(@RequestBody Player player) {
-        return playerService.savePlayer(player);
+    public ResponseEntity<PlayerResponse> createPlayer(@RequestBody CreatePlayerRequest request) {
+        PlayerResponse createdPlayer = playerService.createPlayer(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdPlayer);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Player> updatePlayer(@PathVariable Long id, @RequestBody Player playerDetails) {
-        try {
-            Player updatedPlayer = playerService.updatePlayer(id, playerDetails);
-            return ResponseEntity.ok(updatedPlayer);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PlayerResponse> updatePlayer(@PathVariable Long id, 
+                                                       @RequestBody UpdatePlayerRequest request) {
+        PlayerResponse updatedPlayer = playerService.updatePlayer(id, request);
+        return ResponseEntity.ok(updatedPlayer);
+    }
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity<PlayerResponse> patchPlayer(@PathVariable Long id,
+                                                      @RequestBody PatchPlayerRequest request) {
+        PlayerResponse updatedPlayer = playerService.patchPlayer(id, request);
+        return ResponseEntity.ok(updatedPlayer);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePlayer(@PathVariable Long id) {
-        try {
-            playerService.deletePlayer(id);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deletePlayer(@PathVariable Long id) {
+        playerService.deletePlayer(id);
+        return ResponseEntity.noContent().build();
     }
 } 
